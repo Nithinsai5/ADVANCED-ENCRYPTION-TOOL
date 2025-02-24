@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Encryption Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Advanced Encryption Tool</h2>
+                <form id="encryption-form">
+                    <div class="form-group">
+                        <label for="algorithm">Encryption Algorithm:</label>
+                        <select id="algorithm" class="form-control">
+                            <option value="aes">AES</option>
+                            <option value="base64">Base64</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-text">Input Text:</label>
+                        <textarea id="input-text" class="form-control" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Encrypt</button>
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#decryption-modal">Decrypt</button>
+                </form>
+            </div>
+        </div>
+        <div class="modal fade" id="encryption-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Encryption Result</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p id="encryption-result"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="decryption-modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Decryption</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="decryption-form">
+                            <div class="form-group">
+                                <label for="decryption-input">Encrypted Text:</label>
+                                <textarea id="decryption-input" class="form-control" rows="5"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Decrypt</button>
+                        </form>
+                        <p id="decryption-result"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#encryption-form').submit(function(e) {
+                e.preventDefault();
+                var algorithm = $('#algorithm').val();
+                var inputText = $('#input-text').val();
+                if (algorithm === 'aes') {
+                    var encryptedText = CryptoJS.AES.encrypt(inputText, 'secret key').toString();
+                    $('#encryption-result').text(encryptedText);
+                    $('#encryption-modal').modal('show');
+                } else if (algorithm === 'base64') {
+                    var encryptedText = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(inputText));
+                    $('#encryption-result').text(encryptedText);
+                    $('#encryption-modal').modal('show');
+                }
+            });
+            $('#decryption-form').submit(function(e) {
+                e.preventDefault();
+                var decryptionInput = $('#decryption-input').val();
+                var algorithm = 'aes'; // default to aes for now
+                if (algorithm === 'aes') {
+                    var decryptedText = CryptoJS.AES.decrypt(decryptionInput, 'secret key').toString(CryptoJS.enc.Utf8);
+                    $('#decryption-result').text(decryptedText);
+                } else if (algorithm === 'base64') {
+                    var decryptedText = CryptoJS.enc.Base64.parse(decryptionInput).toString(CryptoJS.enc.Utf8);
+                    $('#decryption-result').text(decryptedText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
