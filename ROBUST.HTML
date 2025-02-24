@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encryption Application</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+        .password-strength {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #666;
+        }
+        .password-strength.weak {
+            color: #f00;
+        }
+        .password-strength.medium {
+            color: #ff0;
+        }
+        .password-strength.strong {
+            color: #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">Encryption Application</h2>
+                <form id="file-form">
+                    <div class="form-group">
+                        <label for="file-input">Select File:</label>
+                        <input type="file" id="file-input" class="form-control-file">
+                    </div>
+                    <div class="form-group">
+                        <label for="algorithm">Encryption Algorithm:</label>
+                        <select id="algorithm" class="form-control">
+                            <option value="aes-256">AES-256</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" class="form-control">
+                        <span class="password-strength" id="password-strength"></span>
+                    </div>
+                    <button type="button" id="encrypt-btn" class="btn btn-primary">Encrypt</button>
+                    <button type="button" id="decrypt-btn" class="btn btn-secondary">Decrypt</button>
+                </form>
+                <div id="result-modal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="result-modal-title"></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="result-modal-text"></p>
+                                <a id="download-link" href="#" download>Download</a>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#password').on('input', function() {
+                var password = $(this).val();
+                var strength = getPasswordStrength(password);
+                $('#password-strength').text(strength);
+                if (strength === 'Weak') {
+                    $('#password-strength').addClass('weak').removeClass('medium strong');
+                } else if (strength === 'Medium') {
+                    $('#password-strength').addClass('medium').removeClass('weak strong');
+                } else if (strength === 'Strong') {
+                    $('#password-strength').addClass('strong').removeClass('weak medium');
+                }
+            });
+            function getPasswordStrength(password) {
+                if (password.length < 8) {
+                    return 'Weak';
+                } else if (password.length < 12) {
+                    return 'Medium';
+                } else {
+                    return 'Strong';
+                }
+            }
+            $('#encrypt-btn').click(function() {
+                var file = $('#file-input')[0].files[0];
+                var algorithm = $('#algorithm').val();
+                var password = $('#password').val();
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var fileData = e.target.result;
+                    if (algorithm === 'aes-256') {
+                        var encryptedData = CryptoJS.AES.encrypt(fileData, password).toString();
+                        $('#result-modal-title').text('Encrypted File');
+                        $('#result-modal-text').text(encryptedData);
+                        $('#download-link').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(encryptedData));
+                        $('#result-modal').modal('show');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            $('#decrypt-btn').click(function() {
+                var file = $('#file-input')[0].files[0];
+                var algorithm = $('#algorithm').val();
+                var password = $('#password').val();
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var fileData = e.target.result;
+                    if (algorithm === 'aes-256') {
+                        try {
+                            var decryptedData = CryptoJS.AES.decrypt(fileData, password).toString(CryptoJS.enc.Utf8);
+                            $('#result-modal-title').text('Decrypted File');
+                            $('#result-modal-text').text(decryptedData);
+                            $('#download-link').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(decryptedData));
+                            $('#result-modal').modal('show');
+                        } catch (err) {
+                            $('#result-modal-title').text('Error');
+                            $('#result-modal-text').text('Invalid password or corrupted file.');
+                            $('#result-modal').modal('show');
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            });
+        });
+    </script>
+</body>
+</html>
