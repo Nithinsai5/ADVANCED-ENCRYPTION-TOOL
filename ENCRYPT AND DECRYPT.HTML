@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Encryption/Decryption Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title">File Encryption/Decryption Tool</h2>
+                <form id="file-form">
+                    <div class="form-group">
+                        <label for="file-input">Select File:</label>
+                        <input type="file" id="file-input" class="form-control-file">
+                    </div>
+                    <div class="form-group">
+                        <label for="algorithm">Encryption Algorithm:</label>
+                        <select id="algorithm" class="form-control">
+                            <option value="aes-256">AES-256</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" class="form-control">
+                    </div>
+                    <button type="button" id="encrypt-btn" class="btn btn-primary">Encrypt</button>
+                    <button type="button" id="decrypt-btn" class="btn btn-secondary">Decrypt</button>
+                </form>
+                <div id="result-container">
+                    <h3 id="result-header"></h3>
+                    <p id="result-text"></p>
+                    <a id="download-link" href="#" download>Download</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#encrypt-btn').click(function() {
+                var file = $('#file-input')[0].files[0];
+                var algorithm = $('#algorithm').val();
+                var password = $('#password').val();
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var fileData = e.target.result;
+                    if (algorithm === 'aes-256') {
+                        var encryptedData = CryptoJS.AES.encrypt(fileData, password).toString();
+                        $('#result-header').text('Encrypted File');
+                        $('#result-text').text(encryptedData);
+                        $('#download-link').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(encryptedData));
+                    }
+                };
+                reader.readAsText(file);
+            });
+            $('#decrypt-btn').click(function() {
+                var file = $('#file-input')[0].files[0];
+                var algorithm = $('#algorithm').val();
+                var password = $('#password').val();
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var fileData = e.target.result;
+                    if (algorithm === 'aes-256') {
+                        try {
+                            var decryptedData = CryptoJS.AES.decrypt(fileData, password).toString(CryptoJS.enc.Utf8);
+                            $('#result-header').text('Decrypted File');
+                            $('#result-text').text(decryptedData);
+                            $('#download-link').attr('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(decryptedData));
+                        } catch (err) {
+                            $('#result-header').text('Error');
+                            $('#result-text').text('Invalid password or corrupted file.');
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            });
+        });
+    </script>
+</body>
+</html>
